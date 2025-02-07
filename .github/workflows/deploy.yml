@@ -58,6 +58,6 @@ jobs:
             wget -O docker-compose.yml https://raw.githubusercontent.com/it-moji/it-moji-server/main/docker-compose.yml
             export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
             # docker-compose 명령 실행
-            docker-compose down || true  
-            docker-compose pull
-            docker-compose up -d
+            docker compose down || true  
+            docker compose pull
+            docker compose up -d
