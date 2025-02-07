@@ -28,48 +28,33 @@ jobs:
       - name: 테스트 및 빌드하기
         run: ./gradlew clean build
 
-      - name: AWS Resource에 접근할 수 있게 AWS credentials 설정
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Docker hub 로그인
+        uses: docker/login-action@v3
         with:
-          aws-region: ap-northeast-2
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          username: ${{secrets.DOCKERHUB_USERNAME}}
+          password: ${{secrets.DOCKERHUB_TOKEN}}
 
-      - name: ECR에 로그인하기
-        id: ecr-login
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          region: ap-northeast-2
-
-      - name: Docker 이미지 생성
-        run: docker build -t attraction-api-server .
-
-      - name: Docker 이미지에 Tag 붙이기
-        run: docker tag attraction-api-server ${{ steps.ecr-login.outputs.registry }}/attraction-api-server:latest
-
-      - name: ECR에 Docker 이미지 Push
-        run: docker push ${{ steps.ecr-login.outputs.registry }}/attraction-api-server:latest
-
-      - name: 배포 작업 생성
-        uses: chrnorm/deployment-action@v2
-        id: deployment
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          environment-url: https://attraction.run
-          environment: production
-          ref: ${{ github.ref }}
+      - name: DockerHub에 빌드 및 배포
+        env:
+          NAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          REPO: it-moji-api-server
+        run: |
+          docker build -t $REPO .
+          docker tag $REPO:latest $NAME/$REPO:latest
+          docker push $NAME/$REPO:latest
 
       - name: SSH로 EC2에 접속하기
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          host: ${{ secrets.DEV_EC2_HOST }}
+          username: ${{ secrets.DEV_EC2_USERNAME }}
+          key: ${{ secrets.DEV_EC2_PRIVATE_KEY }}
           script_stop: true
           script: |
-            docker stop attraction-api-server || true  
-            docker rm attraction-api-server || true
-            docker pull ${{ steps.ecr-login.outputs.registry }}/attraction-api-server:latest
-            
-            # Spring Boot 애플리케이션 컨테이너 실행
-            docker run -d --name attraction-api-server --link redis-server:redis -e TZ=Asia/Seoul -p 8080:8080 -v /home/ec2-user/workspace/logs:/logs ${{ steps.ecr-login.outputs.registry }}/attraction-api-server:latest
+            cd /home/ec2-user/app
+            wget -O docker-compose.yml https://raw.githubusercontent.com/Atractorrr/Attraction-Server/dev/docker-compose.yml
+            export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+            # docker-compose 명령 실행
+            docker-compose down || true  
+            docker-compose pull
+            docker-compose up -d
