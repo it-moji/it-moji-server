@@ -6,11 +6,3 @@ services:
       - "8080:8080"
     environment:
       - TZ=Asia/Seoul
-    volumes:
-      - /home/ec2-user/workspace/logs:/logs
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
