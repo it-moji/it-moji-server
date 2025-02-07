@@ -1,0 +1,16 @@
+services:
+  it-moji-api-server:
+    image: ${DOCKERHUB_USERNAME}/it-moji-api-server:latest
+    container_name: it-moji-api-server
+    ports:
+      - "8080:8080"
+    environment:
+      - TZ=Asia/Seoul
+    volumes:
+      - /home/ec2-user/workspace/logs:/logs
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
