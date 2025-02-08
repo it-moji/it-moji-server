@@ -8,7 +8,7 @@ import com.itmoji.itmojiserver.api.v1.announcement.dto.PostDTO;
 import com.itmoji.itmojiserver.api.v1.announcement.SearchType;
 import com.itmoji.itmojiserver.api.v1.announcement.dto.PostSummaryDTO;
 import com.itmoji.itmojiserver.api.v1.announcement.dto.request.PostCreateRequestDTO;
-import com.itmoji.itmojiserver.api.v1.announcement.dto.request.PostSearchRequest;
+import com.itmoji.itmojiserver.api.v1.announcement.dto.request.PostSearchRequestDTO;
 import com.itmoji.itmojiserver.api.v1.announcement.dto.request.UpdatePostRequestDTO;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -102,7 +102,7 @@ public class AnnouncementService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PostSummaryDTO> findPostsBySearchQuery(final Pageable pageable, final PostSearchRequest request) {
+    public Page<PostSummaryDTO> findPostsBySearchQuery(final Pageable pageable, final PostSearchRequestDTO request) {
         final String searchTypeName = SearchType.findSearchType(request.type()).name();
         final Page<Post> posts = announcementRepository.findPostsBySearchQuery(pageable, searchTypeName,
                 request.query());

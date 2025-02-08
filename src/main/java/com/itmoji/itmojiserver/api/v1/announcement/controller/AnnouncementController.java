@@ -7,7 +7,7 @@ import com.itmoji.itmojiserver.api.v1.announcement.dto.OneBasedPage;
 import com.itmoji.itmojiserver.api.v1.announcement.dto.PostDTO;
 import com.itmoji.itmojiserver.api.v1.announcement.dto.PostSummaryDTO;
 import com.itmoji.itmojiserver.api.v1.announcement.dto.request.PostCreateRequestDTO;
-import com.itmoji.itmojiserver.api.v1.announcement.dto.request.PostSearchRequest;
+import com.itmoji.itmojiserver.api.v1.announcement.dto.request.PostSearchRequestDTO;
 import com.itmoji.itmojiserver.api.v1.announcement.dto.request.UpdatePostRequestDTO;
 import com.itmoji.itmojiserver.api.v1.announcement.service.AnnouncementService;
 import com.itmoji.itmojiserver.api.v1.utils.ApiResponse;
@@ -113,8 +113,11 @@ public class AnnouncementController {
     }
 
     @GetMapping("/search")
-    @Operation(summary = "게시물 검색", description = "검색 타입(제목/내용/제목+내용)에 맞는 게시물을 검색해주는 로직")
-    public ApiResponse<OneBasedPage<PostSummaryDTO>> searchPosts(@ModelAttribute PostSearchRequest request
+    @Operation(
+            summary = "게시물 검색",
+            description = "검색 타입(제목/내용/제목+내용)에 맞는 게시물을 검색해주는 로직, 파라미터 중 query와 type은 필수입니다."
+    )
+    public ApiResponse<OneBasedPage<PostSummaryDTO>> searchPosts(@ModelAttribute PostSearchRequestDTO request
     ) {
         Pageable pageable = PageRequest.of(request.page(), request.size());
         final Page<PostSummaryDTO> posts = announcementService.findPostsBySearchQuery(pageable, request);
