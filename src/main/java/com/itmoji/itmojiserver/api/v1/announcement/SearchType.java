@@ -17,7 +17,7 @@ public enum SearchType {
 
     public static SearchType findSearchType(final String type) {
         return Arrays.stream(SearchType.values())
-                .filter(searchType -> searchType.type.equals(type))
+                .filter(searchType -> searchType.name().equalsIgnoreCase(type))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 검색 타입입니다."));
     }
