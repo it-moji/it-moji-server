@@ -9,6 +9,4 @@ public interface AttendanceDetailOptionRepository extends JpaRepository<Attendan
     List<AttendanceDetailOption> findByParsingOptionsId(Long parsingOptionsId);
 
     Optional<AttendanceDetailOption> findById(Long id);
-
-    Optional<AttendanceDetailOption> findByName(String name);
 }
