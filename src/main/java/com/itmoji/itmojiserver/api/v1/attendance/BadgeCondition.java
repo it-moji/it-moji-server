@@ -23,7 +23,12 @@ public class BadgeCondition {
 
     private Long badgeConditionGroupId;
 
-    private String conditionKey;
+    @Enumerated(EnumType.STRING)
+    private AttendanceOptions conditionKey;
+
+    @Column(name = "detail_key_id")
+    private Long detailKeyId;
+
     private int count;
 
     @Enumerated(EnumType.STRING)
@@ -34,15 +39,17 @@ public class BadgeCondition {
     }
 
     @Builder
-    public BadgeCondition(Long badgeConditionGroupId, String key, int count, Range range) {
+    public BadgeCondition(Long badgeConditionGroupId, AttendanceOptions key, Long detailKeyId, int count, Range range) {
         this.badgeConditionGroupId = badgeConditionGroupId;
         this.conditionKey = key;
+        this.detailKeyId = detailKeyId;
         this.count = count;
         this.conditionRange = range;
     }
 
-    public void update(String key, int count, Range range) {
+    public void update(AttendanceOptions key, Long detailKeyId, int count, Range range) {
         this.conditionKey = key;
+        this.detailKeyId = detailKeyId;
         this.count = count;
         this.conditionRange = range;
     }

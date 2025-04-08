@@ -15,6 +15,9 @@ public class ConditionCreateRequest {
     @NotBlank(message = "조건 key는 필수 입력 값입니다.")
     private String key;
 
+    @NotBlank(message = "조건 detailKey는 필수 입력 값입니다.")
+    private Long detailKey;
+
     @NotNull(message = "count는 필수 입력 값입니다.")
     private Integer count;
 
