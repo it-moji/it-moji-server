@@ -4,13 +4,11 @@ import com.itmoji.itmojiserver.api.v1.attendance.Badge;
 import com.itmoji.itmojiserver.api.v1.attendance.BadgeCondition;
 import com.itmoji.itmojiserver.api.v1.attendance.BadgeConditionGroup;
 import com.itmoji.itmojiserver.api.v1.attendance.dto.BadgeConditionDTO;
-import com.itmoji.itmojiserver.api.v1.attendance.dto.BadgeConditionGroupDTO;
 import com.itmoji.itmojiserver.api.v1.attendance.dto.BadgeConditionRequest;
 import com.itmoji.itmojiserver.api.v1.attendance.dto.BadgeDTO;
 import com.itmoji.itmojiserver.api.v1.attendance.dto.BadgeRequest;
 import com.itmoji.itmojiserver.api.v1.attendance.dto.BadgeUpdateDTO;
 import com.itmoji.itmojiserver.api.v1.attendance.dto.BadgeWithConditionsDTO;
-import com.itmoji.itmojiserver.api.v1.attendance.dto.BadgeWithConditionsForUpdateDTO;
 import com.itmoji.itmojiserver.api.v1.attendance.dto.ConditionCreateRequest;
 import com.itmoji.itmojiserver.api.v1.attendance.dto.ConditionDTO;
 import com.itmoji.itmojiserver.api.v1.attendance.dto.ConditionGroupDTO;
@@ -48,7 +46,8 @@ public class BadgeService {
             List<ConditionGroupDTO> groupDTOs = groups.stream().map(group -> {
                 List<BadgeCondition> conditions = conditionRepository.findByBadgeConditionGroupId(group.getId());
                 List<ConditionDTO> conditionDTOs = conditions.stream().map(condition ->
-                        new ConditionDTO(condition.getId(), condition.getConditionKey(), condition.getCount(), condition.getConditionRange().name()))
+                                new ConditionDTO(condition.getId(), condition.getConditionKey(), condition.getCount(),
+                                        condition.getConditionRange().name()))
                         .toList();
                 return new ConditionGroupDTO(group.getId(), conditionDTOs);
             }).toList();
@@ -59,12 +58,15 @@ public class BadgeService {
     @Transactional
     public void createCondition(Long badgeId, ConditionCreateRequest request) {
         badgeRepository.findById(badgeId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge not found with id: " + badgeId));
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge not found with id: " + badgeId));
 
         BadgeConditionGroup group = groupRepository.findById(request.getBadgeConditionGroupId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "BadgeConditionGroup not found with id: " + request.getBadgeConditionGroupId()));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "BadgeConditionGroup not found with id: " + request.getBadgeConditionGroupId()));
         if (!group.getBadgeId().equals(badgeId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The condition group does not belong to the specified badge.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "The condition group does not belong to the specified badge.");
         }
 
         BadgeCondition.Range rangeEnum;
@@ -103,7 +105,8 @@ public class BadgeService {
                 } else if ("less".equalsIgnoreCase(conditionReq.getRange())) {
                     rangeEnum = BadgeCondition.Range.LESS;
                 } else {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "유효하지 않은 range 값입니다: " + conditionReq.getRange());
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "유효하지 않은 range 값입니다: " + conditionReq.getRange());
                 }
 
                 BadgeCondition condition = new BadgeCondition(
@@ -120,15 +123,19 @@ public class BadgeService {
     @Transactional
     public void updateCondition(Long badgeId, Long conditionId, ConditionUpdateRequest request) {
         badgeRepository.findById(badgeId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge not found with id: " + badgeId));
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge not found with id: " + badgeId));
 
         BadgeCondition condition = conditionRepository.findById(conditionId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "BadgeCondition not found with id: " + conditionId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "BadgeCondition not found with id: " + conditionId));
 
         BadgeConditionGroup group = groupRepository.findById(condition.getBadgeConditionGroupId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "BadgeConditionGroup not found for condition."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "BadgeConditionGroup not found for condition."));
         if (!group.getBadgeId().equals(badgeId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The condition does not belong to the specified badge.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "The condition does not belong to the specified badge.");
         }
 
         // range 문자열을 enum으로 변환
@@ -148,7 +155,8 @@ public class BadgeService {
     @Transactional
     public void updateBadgeWithAll(Long badgeId, BadgeUpdateDTO dto) {
         Badge badge = badgeRepository.findById(badgeId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 배지를 찾을 수 없습니다. badgeId=" + badgeId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "해당 배지를 찾을 수 없습니다. badgeId=" + badgeId));
         badge.updateIcon(dto.getIcon());
         badge.updateName(dto.getName());
         badgeRepository.save(badge);
@@ -161,7 +169,7 @@ public class BadgeService {
         groupRepository.deleteAll(oldGroups);
 
         if (dto.getConditionGroups() == null) {
-            return ;
+            return;
         }
 
         for (List<BadgeConditionDTO> conditionsList : dto.getConditionGroups()) {
@@ -201,17 +209,46 @@ public class BadgeService {
     @Transactional
     public void deleteCondition(Long badgeId, Long conditionId) {
         badgeRepository.findById(badgeId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge not found with id: " + badgeId));
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge not found with id: " + badgeId));
 
         BadgeCondition condition = conditionRepository.findById(conditionId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "BadgeCondition not found with id: " + conditionId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "BadgeCondition not found with id: " + conditionId));
 
         BadgeConditionGroup group = groupRepository.findById(condition.getBadgeConditionGroupId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "BadgeConditionGroup not found for condition."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "BadgeConditionGroup not found for condition."));
         if (!group.getBadgeId().equals(badgeId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The condition does not belong to the specified badge.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "The condition does not belong to the specified badge.");
         }
 
         conditionRepository.deleteById(conditionId);
+    }
+
+    @Transactional(readOnly = true)
+    public BadgeWithConditionsDTO getBadgeWithConditions(Long badgeId) {
+        Badge badge = badgeRepository.findById(badgeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 배지를 찾을 수 없습니다."));
+
+        List<BadgeConditionGroup> groups = groupRepository.findByBadgeId(badge.getId());
+
+        List<ConditionGroupDTO> groupDTOs = groups.stream()
+                .map(group -> {
+                    List<BadgeCondition> conditions = conditionRepository.findByBadgeConditionGroupId(group.getId());
+                    List<ConditionDTO> conditionDTOs = conditions.stream()
+                            .map(condition -> new ConditionDTO(
+                                    condition.getId(),
+                                    condition.getConditionKey(),
+                                    condition.getCount(),
+                                    condition.getConditionRange().name()
+                            ))
+                            .toList();
+                    return new ConditionGroupDTO(group.getId(), conditionDTOs);
+                })
+                .toList();
+
+        return new BadgeWithConditionsDTO(badge.getId(), badge.getIcon(), badge.getName(), groupDTOs);
     }
 }
