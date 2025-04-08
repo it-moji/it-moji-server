@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class BadgeConditionDTO {
     private String key;
+    private long detailKeyId;
     private int count;
     private String range;
 }
