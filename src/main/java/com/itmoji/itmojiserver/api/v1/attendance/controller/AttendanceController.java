@@ -104,6 +104,12 @@ public class AttendanceController {
         return ApiResponse.from(HttpStatus.CREATED, "배지가 생성되었습니다.", null);
     }
 
+    @GetMapping("/badges/{id}")
+    public ApiResponse<BadgeWithConditionsDTO> getBadgeWithConditions(@PathVariable Long id) {
+        BadgeWithConditionsDTO dto = badgeService.getBadgeWithConditions(id);
+        return ApiResponse.from(HttpStatus.OK, "성공", dto);
+    }
+
     @PostMapping("/badges/{badgeId}/condition-groups")
     @Operation(summary = "배지 기준 추가", description = "특정 배지의 새로운 배지 조건을 추가합니다.")
     public ApiResponse<Void> createCondition(@PathVariable Long badgeId,
