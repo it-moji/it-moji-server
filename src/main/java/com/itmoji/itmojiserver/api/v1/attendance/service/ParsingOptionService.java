@@ -16,6 +16,7 @@ import com.itmoji.itmojiserver.api.v1.attendance.repository.DetailOptionReposito
 import com.itmoji.itmojiserver.api.v1.attendance.repository.ParsingOptionsRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -47,13 +48,15 @@ public class ParsingOptionService {
                 dayMapping.getSaturday(),
                 dayMapping.getSunday());
 
-        final List<DetailOption> detailOptions = detailOptionRepository.findByOption(new AttendanceOption(AttendanceOptions.ATTENDANCE, "출석"));
+        final List<DetailOption> detailOptions = detailOptionRepository.findByOption(
+                new AttendanceOption(AttendanceOptions.ATTENDANCE, "출석"));
 
-        final List<AttendanceDetailOptionDTO> detailOptionDTOs = detailOptions.stream().map(t -> {
-            final AttendanceDetailOption option = attendanceDetailOptionRepository.findById(t.getId())
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 옵션입니다."));
-            return new AttendanceDetailOptionDTO(t.getId(), t.getName(), option.getIdentifier());
-        }).toList();
+        final List<AttendanceDetailOptionDTO> detailOptionDTOs = detailOptions.stream()
+                .map(o -> attendanceDetailOptionRepository.findById(o.getId())
+                        .map(option -> new AttendanceDetailOptionDTO(o.getId(), o.getName(), option.getIdentifier())))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
 
         return new ParsingOptionsDTO(delimiterDTO, dayMappingDTO, options.getName(), detailOptionDTOs);
     }
@@ -64,11 +67,14 @@ public class ParsingOptionService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "파싱 옵션을 찾을 수 없습니다."));
 
         DelimiterDTO delimiterDTO = optionsDTO.getDelimiter();
-        options.updateDelimiter(new Delimiter(delimiterDTO.getPerson(), delimiterDTO.getLine(), delimiterDTO.getTitle()));
+        options.updateDelimiter(
+                new Delimiter(delimiterDTO.getPerson(), delimiterDTO.getLine(), delimiterDTO.getTitle()));
 
         DayMappingDTO dayMappingDTO = optionsDTO.getDayMapping();
-        options.updateDayMapping(new DayMapping(dayMappingDTO.getMonday(), dayMappingDTO.getTuesday(), dayMappingDTO.getWednesday(),
-                dayMappingDTO.getThursday(), dayMappingDTO.getFriday(), dayMappingDTO.getSaturday(), dayMappingDTO.getSunday()));
+        options.updateDayMapping(
+                new DayMapping(dayMappingDTO.getMonday(), dayMappingDTO.getTuesday(), dayMappingDTO.getWednesday(),
+                        dayMappingDTO.getThursday(), dayMappingDTO.getFriday(), dayMappingDTO.getSaturday(),
+                        dayMappingDTO.getSunday()));
 
         options.updateName(optionsDTO.getName());
 
@@ -81,13 +87,15 @@ public class ParsingOptionService {
             throw new IllegalArgumentException("출석 상세 옵션이 빠져있습니다.");
         }
 
-        final List<DetailOption> detailOptions = detailOptionRepository.findByOption(new AttendanceOption(AttendanceOptions.ATTENDANCE, "출석"));
+        final List<DetailOption> detailOptions = detailOptionRepository.findByOption(
+                new AttendanceOption(AttendanceOptions.ATTENDANCE, "출석"));
 
         List<AttendanceDetailOption> detailOptionsBox = new ArrayList<>();
         for (AttendanceDetailOptionDTO detailDTO : optionsDTO.getAttendanceDetailOptions()) {
             final DetailOption detailOption = detailOptions.stream()
                     .filter(deo -> deo.getName().equals(detailDTO.getName())).findFirst().orElseThrow();
-            AttendanceDetailOption attendanceDetailOption = new AttendanceDetailOption(detailOption.getId(), 1L, detailOption.getName(), detailDTO.getIdentifier());
+            AttendanceDetailOption attendanceDetailOption = new AttendanceDetailOption(detailOption.getId(), 1L,
+                    detailOption.getName(), detailDTO.getIdentifier());
             detailOptionsBox.add(attendanceDetailOption);
         }
 
@@ -104,8 +112,10 @@ public class ParsingOptionService {
         Delimiter delimiter = new Delimiter(delimiterDTO.getPerson(), delimiterDTO.getLine(), delimiterDTO.getTitle());
 
         DayMappingDTO dayMappingDTO = optionsDTO.getDayMapping();
-        DayMapping dayMapping = new DayMapping(dayMappingDTO.getMonday(), dayMappingDTO.getTuesday(), dayMappingDTO.getWednesday(),
-                dayMappingDTO.getThursday(), dayMappingDTO.getFriday(), dayMappingDTO.getSaturday(), dayMappingDTO.getSunday());
+        DayMapping dayMapping = new DayMapping(dayMappingDTO.getMonday(), dayMappingDTO.getTuesday(),
+                dayMappingDTO.getWednesday(),
+                dayMappingDTO.getThursday(), dayMappingDTO.getFriday(), dayMappingDTO.getSaturday(),
+                dayMappingDTO.getSunday());
 
         ParsingOptions options = new ParsingOptions(1L, delimiter, dayMapping, optionsDTO.getName());
         parsingOptionsRepository.save(options);
@@ -114,13 +124,15 @@ public class ParsingOptionService {
             throw new IllegalArgumentException("출석 상세 옵션이 포함되어있지 않습니다.");
         }
 
-        final List<DetailOption> detailOptions = detailOptionRepository.findByOption(new AttendanceOption(AttendanceOptions.ATTENDANCE, "출석"));
+        final List<DetailOption> detailOptions = detailOptionRepository.findByOption(
+                new AttendanceOption(AttendanceOptions.ATTENDANCE, "출석"));
 
         List<AttendanceDetailOption> detailOptionsBox = new ArrayList<>();
         for (AttendanceDetailOptionDTO detailDTO : optionsDTO.getAttendanceDetailOptions()) {
             final DetailOption detailOption = detailOptions.stream()
                     .filter(deo -> deo.getName().equals(detailDTO.getName())).findFirst().orElseThrow();
-            AttendanceDetailOption attendanceDetailOption = new AttendanceDetailOption(detailOption.getId(), 1L, detailOption.getName(), detailDTO.getIdentifier());
+            AttendanceDetailOption attendanceDetailOption = new AttendanceDetailOption(detailOption.getId(), 1L,
+                    detailOption.getName(), detailDTO.getIdentifier());
             detailOptionsBox.add(attendanceDetailOption);
         }
         attendanceDetailOptionRepository.saveAll(detailOptionsBox);
