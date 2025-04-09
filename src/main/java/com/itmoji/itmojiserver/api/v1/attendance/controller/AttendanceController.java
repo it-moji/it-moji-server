@@ -134,6 +134,13 @@ public class AttendanceController {
         return ApiResponse.from(HttpStatus.OK, "배지 조건이 삭제되었습니다.", null);
     }
 
+    @DeleteMapping("/badges/{badgeId}")
+    @Operation(summary = "배지 삭제", description = "배지를 삭제합니다.")
+    public ApiResponse<Void> deleteBadge(@PathVariable Long badgeId) {
+        badgeService.deleteBadge(badgeId);
+        return ApiResponse.from(HttpStatus.OK, "배지가 삭제되었습니다.", null);
+    }
+
     @PutMapping("/badges/{badgeId}")
     @Operation(summary = "배지 전체 업데이트", description = "배지와 해당 조건 그룹 및 조건들을 한 번에 업데이트합니다.")
     public ApiResponse<Void> updateBadgeWithAll(

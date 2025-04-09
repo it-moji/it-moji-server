@@ -244,4 +244,17 @@ public class BadgeService {
 
         return new BadgeWithConditionsDTO(badge.getId(), badge.getIcon(), badge.getName(), groupDTOs);
     }
+
+    public void deleteBadge(final Long badgeId) {
+        final Badge badge = badgeRepository.findById(badgeId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 배지입니다."));
+
+        badgeRepository.delete(badge);
+        List<BadgeConditionGroup> groups = groupRepository.findByBadgeId(badge.getId());
+        groups.forEach(group -> {
+            List<BadgeCondition> conditions = conditionRepository.findByBadgeConditionGroupId(group.getId());
+            conditionRepository.deleteAll(conditions);
+        });
+        groupRepository.deleteAll(groups);
+    }
 }
