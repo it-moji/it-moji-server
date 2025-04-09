@@ -54,10 +54,10 @@ public class BadgeService {
 
                 List<ConditionDTO> conditionDTOs = conditions.stream().map(condition ->
                         new ConditionDTO(condition.getId(),
-                                condition.getConditionKey().name(),
+                                condition.getConditionKey().name().toLowerCase(),
                                 condition.getDetailKeyId(),
                                 condition.getCount(),
-                                condition.getConditionRange().name())).toList();
+                                condition.getConditionRange().name().toLowerCase())).toList();
 
                 return new ConditionGroupDTO(group.getId(), conditionDTOs);
             }).toList();
@@ -83,7 +83,7 @@ public class BadgeService {
         BadgeCondition condition = new BadgeCondition(
                 request.getBadgeConditionGroupId(),
                 AttendanceOptions.valueOf(request.getKey()),
-                request.getDetailKey(),
+                request.getDetailKeyId(),
                 request.getCount(),
                 rangeEnum
         );
@@ -232,10 +232,10 @@ public class BadgeService {
                     List<ConditionDTO> conditionDTOs = conditions.stream()
                             .map(condition -> new ConditionDTO(
                                     condition.getId(),
-                                    condition.getConditionKey().name(),
+                                    condition.getConditionKey().name().toLowerCase(),
                                     condition.getDetailKeyId(),
                                     condition.getCount(),
-                                    condition.getConditionRange().name()
+                                    condition.getConditionRange().name().toLowerCase()
                             ))
                             .toList();
                     return new ConditionGroupDTO(group.getId(), conditionDTOs);
