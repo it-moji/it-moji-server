@@ -83,7 +83,7 @@ public class BadgeService {
         BadgeCondition condition = new BadgeCondition(
                 request.getBadgeConditionGroupId(),
                 AttendanceOptions.valueOf(request.getKey()),
-                request.getDetailKey(),
+                request.getDetailKeyId(),
                 request.getCount(),
                 rangeEnum
         );
