@@ -1,7 +1,6 @@
 package com.itmoji.itmojiserver.api.v1.attendance.service;
 
 import com.itmoji.itmojiserver.api.v1.attendance.AttendanceDetailOption;
-import com.itmoji.itmojiserver.api.v1.attendance.AttendanceOption;
 import com.itmoji.itmojiserver.api.v1.attendance.AttendanceOptions;
 import com.itmoji.itmojiserver.api.v1.attendance.DayMapping;
 import com.itmoji.itmojiserver.api.v1.attendance.Delimiter;
@@ -16,7 +15,6 @@ import com.itmoji.itmojiserver.api.v1.attendance.repository.DetailOptionReposito
 import com.itmoji.itmojiserver.api.v1.attendance.repository.ParsingOptionsRepository;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -48,17 +46,19 @@ public class ParsingOptionService {
                 dayMapping.getSaturday(),
                 dayMapping.getSunday());
 
-        final List<DetailOption> detailOptions = detailOptionRepository.findByOption(
-                new AttendanceOption(AttendanceOptions.ATTENDANCE, "출석"));
+        final List<DetailOption> detailOptions = findAttendanceDetailOptions();
 
         final List<AttendanceDetailOptionDTO> detailOptionDTOs = detailOptions.stream()
                 .map(o -> attendanceDetailOptionRepository.findById(o.getId())
-                        .map(option -> new AttendanceDetailOptionDTO(o.getId(), o.getName(), option.getIdentifier())))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                        .map(option -> new AttendanceDetailOptionDTO(o.getId(), o.getName(), option.getIdentifier()))
+                        .orElseGet(() -> new AttendanceDetailOptionDTO(o.getId(), o.getName(), null)))
                 .toList();
 
         return new ParsingOptionsDTO(delimiterDTO, dayMappingDTO, options.getName(), detailOptionDTOs);
+    }
+
+    private List<DetailOption> findAttendanceDetailOptions() {
+        return detailOptionRepository.findByAttendanceOptions(AttendanceOptions.ATTENDANCE);
     }
 
     @Transactional
@@ -87,8 +87,7 @@ public class ParsingOptionService {
             throw new IllegalArgumentException("출석 상세 옵션이 빠져있습니다.");
         }
 
-        final List<DetailOption> detailOptions = detailOptionRepository.findByOption(
-                new AttendanceOption(AttendanceOptions.ATTENDANCE, "출석"));
+        final List<DetailOption> detailOptions = findAttendanceDetailOptions();
 
         List<AttendanceDetailOption> detailOptionsBox = new ArrayList<>();
         for (AttendanceDetailOptionDTO detailDTO : optionsDTO.getAttendanceDetailOptions()) {
@@ -124,8 +123,7 @@ public class ParsingOptionService {
             throw new IllegalArgumentException("출석 상세 옵션이 포함되어있지 않습니다.");
         }
 
-        final List<DetailOption> detailOptions = detailOptionRepository.findByOption(
-                new AttendanceOption(AttendanceOptions.ATTENDANCE, "출석"));
+        final List<DetailOption> detailOptions = findAttendanceDetailOptions();
 
         List<AttendanceDetailOption> detailOptionsBox = new ArrayList<>();
         for (AttendanceDetailOptionDTO detailDTO : optionsDTO.getAttendanceDetailOptions()) {
