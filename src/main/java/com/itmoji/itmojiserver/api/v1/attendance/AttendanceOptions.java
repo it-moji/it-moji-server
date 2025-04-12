@@ -1,5 +1,6 @@
 package com.itmoji.itmojiserver.api.v1.attendance;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.Arrays;
 
 public enum AttendanceOptions {
@@ -23,6 +24,15 @@ public enum AttendanceOptions {
         return Arrays.stream(AttendanceOptions.values())
                 .filter(attendanceOptions -> attendanceOptions.name().equals(category.toUpperCase()))
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않은 출석 옵션입니다." + category));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않은 출석 옵션이에요: " + category));
+    }
+
+    @JsonCreator
+    public static AttendanceOptions from(String category) {
+        try {
+            return AttendanceOptions.valueOf(category.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("존재하지 않은 출석 옵션이에요: " + category);
+        }
     }
 }
