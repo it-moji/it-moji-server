@@ -13,7 +13,6 @@ import com.itmoji.itmojiserver.api.v1.attendance.repository.DetailOptionReposito
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,10 +55,13 @@ public class AttendanceService {
     }
 
     @Transactional
-    public void addDetailOption(final AttendanceOptions options, final String name ) {
+    public void addDetailOption(final AttendanceOptions options, final String name) {
+
+        attendanceOptionRepository.findByName(name)
+                .orElseThrow(() -> new IllegalArgumentException("이미 같은 이름의 배지가 존재해요"));
 
         final AttendanceOption option = attendanceOptionRepository.findByOptions(options)
-                .orElseThrow(() -> new IllegalArgumentException("해당 출석 옵션을 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("해당 출석 옵션을 존재하지 않아요"));
 
         // 2) DetailOption 생성
         DetailOption newDetailOption = new DetailOption(name);
