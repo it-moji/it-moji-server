@@ -15,4 +15,6 @@ public interface AttendanceOptionRepository extends JpaRepository<AttendanceOpti
 
     @Query("SELECT ao FROM AttendanceOption ao WHERE ao.code = :attendanceOptions")
     Optional<AttendanceOption> findByOptions(AttendanceOptions attendanceOptions);
+
+    Optional<AttendanceOption> findByName(String code);
 }
