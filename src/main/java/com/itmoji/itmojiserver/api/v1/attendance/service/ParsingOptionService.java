@@ -51,7 +51,7 @@ public class ParsingOptionService {
         final List<AttendanceDetailOptionDTO> detailOptionDTOs = detailOptions.stream()
                 .map(o -> attendanceDetailOptionRepository.findById(o.getId())
                         .map(option -> new AttendanceDetailOptionDTO(o.getId(), o.getName(), option.getIdentifier()))
-                        .orElseGet(() -> new AttendanceDetailOptionDTO(o.getId(), o.getName(), null)))
+                        .orElseGet(() -> new AttendanceDetailOptionDTO(o.getId(), o.getName(), o.getName())))
                 .toList();
 
         return new ParsingOptionsDTO(delimiterDTO, dayMappingDTO, options.getName(), detailOptionDTOs);
@@ -98,7 +98,20 @@ public class ParsingOptionService {
             detailOptionsBox.add(attendanceDetailOption);
         }
 
+        validateIdentifier(detailOptionsBox);
+
         attendanceDetailOptionRepository.saveAll(detailOptionsBox);
+    }
+
+    private void validateIdentifier(final List<AttendanceDetailOption> detailOptionDTOs) {
+        long uniqueIdentifierCount = detailOptionDTOs.stream()
+                .map(AttendanceDetailOption::getIdentifier)
+                .distinct()
+                .count();
+
+        if (uniqueIdentifierCount != detailOptionDTOs.size()) {
+            throw new IllegalArgumentException("Identifier 값이 중복되었습니다.");
+        }
     }
 
     @Transactional
