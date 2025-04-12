@@ -82,7 +82,7 @@ public class BadgeService {
         BadgeCondition.Range rangeEnum = parseRange(request.getRange());
         BadgeCondition condition = new BadgeCondition(
                 request.getBadgeConditionGroupId(),
-                AttendanceOptions.valueOf(request.getKey()),
+                request.getKey(),
                 request.getDetailKeyId(),
                 request.getCount(),
                 rangeEnum
@@ -102,15 +102,7 @@ public class BadgeService {
             group = groupRepository.save(group);
 
             for (BadgeConditionRequest conditionReq : groupOptions) {
-                BadgeCondition.Range rangeEnum;
-                if ("more".equalsIgnoreCase(conditionReq.range())) {
-                    rangeEnum = BadgeCondition.Range.MORE;
-                } else if ("less".equalsIgnoreCase(conditionReq.range())) {
-                    rangeEnum = BadgeCondition.Range.LESS;
-                } else {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "유효하지 않은 range 값입니다: " + conditionReq.range());
-                }
+                BadgeCondition.Range rangeEnum = parseRange(conditionReq.range());
 
                 BadgeCondition condition = new BadgeCondition(
                         group.getId(),
@@ -138,7 +130,7 @@ public class BadgeService {
         }
         BadgeCondition.Range rangeEnum = parseRange(request.range());
 
-        condition.update(AttendanceOptions.valueOf(request.key().toUpperCase()), request.detailKeyId(), request.count(),
+        condition.update(request.key(), request.detailKeyId(), request.count(),
                 rangeEnum);
         conditionRepository.save(condition);
     }
@@ -174,9 +166,12 @@ public class BadgeService {
             if (conditionsList != null) {
                 for (BadgeConditionDTO condDTO : conditionsList) {
                     BadgeCondition.Range rangeEnum = parseRange(condDTO.getRange());
+                    detailOptionRepository.findById(condDTO.getDetailKeyId())
+                            .orElseThrow(() -> new IllegalArgumentException(
+                                    "존재하지 않는 detailKeyId 입니다 :" + condDTO.getDetailKeyId()));
                     BadgeCondition newCondition = BadgeCondition.builder()
                             .badgeConditionGroupId(newGroup.getId())
-                            .key(AttendanceOptions.valueOf(condDTO.getKey()))
+                            .key(condDTO.getKey())
                             .detailKeyId(condDTO.getDetailKeyId())
                             .count(condDTO.getCount())
                             .range(rangeEnum)
