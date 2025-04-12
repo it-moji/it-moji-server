@@ -8,6 +8,7 @@ import com.itmoji.itmojiserver.api.v1.attendance.Badge;
 import com.itmoji.itmojiserver.api.v1.attendance.DetailOption;
 import com.itmoji.itmojiserver.api.v1.attendance.dto.AttendanceCategoryDTO;
 import com.itmoji.itmojiserver.api.v1.attendance.dto.DetailOptionDTO;
+import com.itmoji.itmojiserver.api.v1.attendance.repository.AttendanceDetailOptionRepository;
 import com.itmoji.itmojiserver.api.v1.attendance.repository.AttendanceOptionRepository;
 import com.itmoji.itmojiserver.api.v1.attendance.repository.BadgeRepository;
 import com.itmoji.itmojiserver.api.v1.attendance.repository.DetailOptionRepository;
@@ -25,7 +26,7 @@ public class AttendanceService {
     private final AttendanceOptionRepository attendanceOptionRepository;
     private final DetailOptionRepository detailOptionRepository;
     private final BadgeRepository badgeRepository;
-    private final AttendanceDetailOption attendanceDetailOption;
+    private final AttendanceDetailOptionRepository attendanceDetailOptionRepository;
 
     @Transactional(readOnly = true)
     public Map<String, AttendanceCategoryDTO> getAllAttendanceOptions() {
@@ -97,12 +98,16 @@ public class AttendanceService {
         DetailOption detailOption = detailOptionRepository.findById(detailOptionId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상세 옵션입니다."));
 
+        final AttendanceDetailOption attendanceDetailOption = attendanceDetailOptionRepository.findById(detailOptionId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상세 옵션이에요"));
+
         if (detailOption.getAttendanceOption() != option) {
             throw new IllegalStateException("해당 옵션에 속하지 않은 상세 옵션입니다.");
         }
 
         detailOptionRepository.delete(detailOption);
         attendanceOptionRepository.delete(option);
+        attendanceDetailOptionRepository.delete(attendanceDetailOption);
     }
 
     @Transactional(readOnly = true)
