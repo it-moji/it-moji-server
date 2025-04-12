@@ -1,6 +1,7 @@
 package com.itmoji.itmojiserver.api.v1.attendance.service;
 
 
+import com.itmoji.itmojiserver.api.v1.attendance.AttendanceDetailOption;
 import com.itmoji.itmojiserver.api.v1.attendance.AttendanceOption;
 import com.itmoji.itmojiserver.api.v1.attendance.AttendanceOptions;
 import com.itmoji.itmojiserver.api.v1.attendance.Badge;
@@ -24,6 +25,7 @@ public class AttendanceService {
     private final AttendanceOptionRepository attendanceOptionRepository;
     private final DetailOptionRepository detailOptionRepository;
     private final BadgeRepository badgeRepository;
+    private final AttendanceDetailOption attendanceDetailOption;
 
     @Transactional(readOnly = true)
     public Map<String, AttendanceCategoryDTO> getAllAttendanceOptions() {
@@ -57,8 +59,10 @@ public class AttendanceService {
     @Transactional
     public void addDetailOption(final AttendanceOptions options, final String name) {
 
-        attendanceOptionRepository.findByName(name)
-                .orElseThrow(() -> new IllegalArgumentException("이미 같은 이름의 배지가 존재해요"));
+        detailOptionRepository.findByName(name)
+                .ifPresent(detailOption -> {
+                    throw new IllegalArgumentException("이미 존재하는 이름 입니다.");
+                });
 
         final AttendanceOption option = attendanceOptionRepository.findByOptions(options)
                 .orElseThrow(() -> new IllegalArgumentException("해당 출석 옵션을 존재하지 않아요"));
@@ -98,6 +102,7 @@ public class AttendanceService {
         }
 
         detailOptionRepository.delete(detailOption);
+        attendanceOptionRepository.delete(option);
     }
 
     @Transactional(readOnly = true)
